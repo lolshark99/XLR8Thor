@@ -15,7 +15,7 @@ against the hardware cost.
 
 ## Progress
 - [x] ALU, with a self-checking testbench
-- [ ] Register file
+- [x] Register file
 - [ ] Immediate generator
 - [ ] Control unit
 - [ ] Branch unit
