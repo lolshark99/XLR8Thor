@@ -19,6 +19,31 @@ reg_file dut(
     .rs1_op(tb_rs1_op),
     .rs2_op(tb_rs2_op),
 );
+initial tb_clk = 0; 
+always #5 tb_clk = !tb_clk; // clk flips every 5ns
 
+task write_reg;
+input [4:0] addr;
+input [31:0] data;
+begin
+    tb_rd = addr;
+    tb_mess = data;
+    tb_we = 1;
+    @(posedge clk)begin
+        #1;
+        tb_we = 0;
+    end
+end
+endtask
+task check_reg;
+input [4:0] addr;
+input [31:0] expected_op;
+begin
+    rs1_op = addr;
+    rs2_op = addr;
+    #1;
+    
+end
+endtask
 
 endmodule
