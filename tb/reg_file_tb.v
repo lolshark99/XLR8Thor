@@ -5,8 +5,8 @@ module tb_reg_file;
 reg tb_clk;
 reg tb_we;
 reg [4:0] tb_rs1 , tb_rs2 , tb_rd;
-wire [31:0] tb_mess , tb_rs1_op ,tb_rs2_op; 
-//reg [31:0]
+reg [31:0] tb_mess  
+wire [31:0] tb_rs1_op, tb_rs2_op;
 integer errors = 0;
 
 reg_file dut(
@@ -17,7 +17,7 @@ reg_file dut(
     .rd(tb_rd),
     .mess(tb_mess),
     .rs1_op(tb_rs1_op),
-    .rs2_op(tb_rs2_op),
+    .rs2_op(tb_rs2_op)
 );
 initial tb_clk = 0; 
 always #5 tb_clk = !tb_clk; // clk flips every 5ns
@@ -29,21 +29,21 @@ begin
     tb_rd = addr;
     tb_mess = data;
     tb_we = 1;
-    @(posedge clk)begin
+    @(posedge tb_clk)begin
         #1;
         tb_we = 0;
     end
 end
 endtask
-task check_reg;
+task check_read;
 input [4:0] addr;
 input [31:0] expected_op;
 begin
-    tb_rs1_oprs1_op = addr;
-    tb_rs2_op = addr;
+    tb_rs1 = addr;
+    tb_rs2 = addr;
     #1;
-    if(tb_rs1_op != expected_op || tb_rs2_op != expected_op)begin
-        $display("FAIL: read x%0d  rs1_op=%h rs2_op=%h expected=%h",addr, tb_rs1_op, tb_rs2_op, expected);
+    if(tb_rs1_op !== expected_op || tb_rs2_op !== expected_op)begin
+        $display("FAIL: read x%0d  rs1_op=%h rs2_op=%h expected=%h",addr, tb_rs1_op, tb_rs2_op, expected_op);
         errors = errors + 1;                 
     end
 end
