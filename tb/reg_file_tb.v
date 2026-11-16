@@ -5,7 +5,7 @@ module tb_reg_file;
 reg tb_clk;
 reg tb_we;
 reg [4:0] tb_rs1 , tb_rs2 , tb_rd;
-reg [31:0] tb_mess  
+reg [31:0] tb_mess;
 wire [31:0] tb_rs1_op, tb_rs2_op;
 integer errors = 0;
 
