@@ -6,7 +6,7 @@ module reg_file (
     input wire[4:0] rd, // address of the reg where we have written data
     input wire[31:0] mess, // message , data that is written
     output wire[31:0] rs1_op, // final state of reg1 that is read
-    output wire[31:0] rs2_op // final stage of reg2 that is read 
+    output wire[31:0] rs2_op // final stage of reg2 that is read w      
 );
 reg [31:0] regis [0:31]; // meaning 32 bit sized 32 regis
 integer i; 
