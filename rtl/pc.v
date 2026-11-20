@@ -18,4 +18,12 @@ assign pc_plus4 = pc + 32'd4;
 assign jalr_target = (rs1_data + imm) & ~32'd1;
 
 assign pc_next = jarl ? pc_jarl : (jal | branch) ? pc_target : pc_plus4;
+always @(posedge clk) begin
+    if(rst)begin
+        pc <= 0;
+    end
+    else begin
+        pc <= pc_next;
+    end
+end
 endmodule
