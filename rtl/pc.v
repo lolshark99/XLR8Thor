@@ -2,8 +2,8 @@ module pc (
     input wire clk;
     input wire rst;
     input wire branch;
-    input wire Jal;
-    input wire Jalr;
+    input wire jal;
+    input wire jalr;
     input wire [31:0] immediate;
     input wire [31:0] rs_1_data;
     output reg [31:0] pc;
@@ -17,4 +17,5 @@ assign pc_target = pc + immediate;
 assign pc_plus4 = pc + 32'd4;
 assign jalr_target = (rs1_data + imm) & ~32'd1;
 
+assign pc_next = jarl ? pc_jarl : (jal | branch) ? pc_target : pc_plus4;
 endmodule
