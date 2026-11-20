@@ -16,7 +16,7 @@ wire [31:0] pc_now; // final addres in the pc
 
 assign pc_target = pc + immediate;
 assign pc_plus4 = pc + 32'd4;
-assign jalr_target = (rs1_data + immediate) & ~32'd1;
+assign pc_jarl = (rs1_data + immediate) & ~32'd1;
 
 assign pc_now = jalr ? pc_jarl : (jal | branch) ? pc_target : pc_plus4;
 always @(posedge clk) begin
