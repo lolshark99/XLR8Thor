@@ -57,6 +57,25 @@ module Control_Unit (
             alu_src = 1'b1;
             wb_sel = 2'b01;
         end
-    endcase
-    end
+        `OP_LUI:begin
+            reg_write = 1'b1;
+            alu_src = 1'b1;
+            alu_a_sel = 2'b10;
+        end
+        `OP_AUIPC:begin
+            reg_write = 1'b1;
+            alu_src = 1'b1;
+            alu_a_sel = 1'b01;
+        end
+        `OP_JAL: begin             // save checkpoint, jump
+            reg_write = 1'b1;
+            wb_sel    = 2'b10;     // rd gets PC+4
+            jal       = 1'b1;
+        end
+        `OP_JALR: begin            // save checkpoint, jump to rs1 + imm
+            reg_write = 1'b1;
+            wb_sel    = 2'b10;
+            jalr      = 1'b1;
+        end
+        endcase
 endmodule
