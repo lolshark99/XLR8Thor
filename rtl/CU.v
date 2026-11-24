@@ -65,7 +65,7 @@ module Control_Unit (
         `OP_AUIPC:begin
             reg_write = 1'b1;
             alu_src = 1'b1;
-            alu_a_sel = 1'b01;
+            alu_a_sel = 2'b01;
         end
         `OP_JAL: begin             // save checkpoint, jump
             reg_write = 1'b1;
@@ -77,5 +77,8 @@ module Control_Unit (
             wb_sel    = 2'b10;
             jalr      = 1'b1;
         end
+        `OP_FENCE, `OP_SYSTEM: ;
+        default: illegal = 1'b1;
         endcase
+    end
 endmodule
