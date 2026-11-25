@@ -3,7 +3,7 @@ module Branch_Comparator (
     input wire [31:0] rs1,
     input wire [31:0] rs2,
     input wire [2:0] funct3,
-    output reg cond_true;
+    output reg cond_true
 );
 always @(*) begin
     case (funct3)
