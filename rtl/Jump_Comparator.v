@@ -9,7 +9,11 @@ always @(*) begin
         3'b000: branch = (rs1 == rs2); 
         //default:
         3'b001: branch = (rs1 != rs2);
-        3'b010: branch = 
+        3'b100: branch = ($signed(rs1) < $signed(rs2));
+        3'b101: branch = ($signed(rs1) >= $signed(rs2));
+        3'b110: branch = (rs1 < rs2);
+        3'b111: branch = (rs1 >= rs2); 
+        default: branch = 1'b0;
     endcase
 end
 endmodule
