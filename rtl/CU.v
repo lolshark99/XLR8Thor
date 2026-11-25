@@ -2,20 +2,20 @@
 `include "imm_gen_opcodes.vh"
 `include "alu_defs.vh"
 module Control_Unit (
-    input  wire [6:0] opcode,     // instr[6:0]
-    input  wire [2:0] funct3,     // instr[14:12]
-    input  wire funct7,     // instr[30] ONLY
-    output reg reg_write,  // 1 = save result into rd
+    input  wire [6:0] opcode,     
+    input  wire [2:0] funct3,     
+    input  wire funct7,     /
+    output reg reg_write,  
     output reg alu_src,    // ALU B: 0 = rs2, 1 = imm
-    output reg  [1:0] alu_a_sel,  // ALU A: 00 = rs1, 01 = PC, 10 = zero
-    output reg  [3:0] alu_ctrl,   // exact ALU operation
-    output reg mem_read,   // 1 = read data memory
-    output reg mem_write,  // 1 = write data memory
-    output reg [1:0] wb_sel,     // rd gets: 00 = ALU, 01 = memory, 10 = PC+4
-    output reg branch,     // 1 = branch instruction
-    output reg jal,        // 1 = JAL
-    output reg jalr,       // 1 = JALR
-    output reg illegal     // 1 = unknown opcode
+    output reg  [1:0] alu_a_sel,  
+    output reg  [3:0] alu_ctrl,   
+    output reg mem_read,   
+    output reg mem_write,  
+    output reg [1:0] wb_sel,     // what data gets stored in the rd 00 -> Simple ALU , 01 -> load ,01 -> PC + 4 for jump 
+    output reg branch,     
+    output reg jal,        
+    output reg jalr,      
+    output reg illegal     
 );
     always @(*) begin
         reg_write = 1'b0;
