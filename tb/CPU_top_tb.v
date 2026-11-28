@@ -17,12 +17,13 @@ module cpu_top_tb;
         tb_rst = 0;
 
         repeat (6) begin
-            $display("PC=%h instr=%h | A=%0d B=%0d | ALU result=%0d",
+            $display("PC=%h instr=%h | A=%0d B=%0d | ALU=%0d | x1=%0d x2=%0d x3=%0d",
                      dut.current_pc, dut.fetched_instr,
-                     dut.alu_in_a, dut.alu_in_b, dut.alu_out);
-            @(posedge tb_clk); #1;       // ← add this back
-            end
-            $finish;
+                     dut.alu_in_a, dut.alu_in_b, dut.alu_out,
+                     dut.u_rf.regis[1], dut.u_rf.regis[2], dut.u_rf.regis[3]);
+            @(posedge tb_clk); #1;
+        end
+        $finish;
     end
 
 endmodule

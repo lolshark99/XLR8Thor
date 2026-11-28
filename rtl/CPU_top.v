@@ -5,29 +5,28 @@ module cpu_top (
     input wire sys_rst
 );
 
-    
-    wire [31:0] current_pc;  // address of the instruction being run
-    wire [31:0] next_seq_pc;    // current_pc + 4
-    wire [31:0] fetched_instr;  // instruction read from ROM
+    // ================= FETCH =================
+    wire [31:0] current_pc;      // address of the instruction being run
+    wire [31:0] next_seq_pc;     // current_pc + 4
+    wire [31:0] fetched_instr;   // instruction read from ROM
 
-    
     pc u_pc (
-        .clk (sys_clk),
-        .rst (sys_rst),
-        .branch (1'b0),          
-        .jal (1'b0),
-        .jalr (1'b0),
-        .immediate (32'b0),
-        .rs1_data (32'b0),
-        .pc (current_pc),
-        .pc_plus4 (next_seq_pc)
+        .clk       (sys_clk),
+        .rst       (sys_rst),
+        .branch    (1'b0),          // TEMPORARY: connected in Step 5
+        .jal       (1'b0),          // TEMPORARY: connected in Step 5
+        .jalr      (1'b0),          // TEMPORARY: connected in Step 5
+        .immediate (32'b0),         // TEMPORARY: connected in Step 5
+        .rs1_data  (32'b0),         // TEMPORARY: connected in Step 5
+        .pc        (current_pc),
+        .pc_plus4  (next_seq_pc)
     );
 
-    
     imem u_imem (
         .addr  (current_pc),
         .instr (fetched_instr)
     );
+
     // ================= DECODE =================
     // --- slice the instruction into its fields ---
     wire [6:0] instr_opcode = fetched_instr[6:0];
@@ -37,7 +36,7 @@ module cpu_top (
     wire [4:0] instr_rs2    = fetched_instr[24:20];
     wire       instr_bit30  = fetched_instr[30];
 
-    // --- control unit outputs ---
+    // --- control unit ---
     wire       ctrl_reg_write;
     wire       ctrl_alu_src;
     wire [1:0] ctrl_alu_a_sel;
@@ -78,19 +77,20 @@ module cpu_top (
     // --- register file ---
     wire [31:0] reg_read1;
     wire [31:0] reg_read2;
+    reg  [31:0] wb_data;         // value to save into rd (from the WB mux)
 
-    regfile u_rf (
-        .clk      (sys_clk),
-        .we       (1'b0),           // TEMPORARY: no writing yet
-        .rs1      (instr_rs1),
-        .rs2      (instr_rs2),
-        .rd       (instr_rd),
-        .wd       (32'b0),          // TEMPORARY
-        .rs1_data (reg_read1),
-        .rs2_data (reg_read2)
+    reg_file u_rf (
+        .clk    (sys_clk),
+        .we     (ctrl_reg_write),   // whether to save
+        .rs1    (instr_rs1),
+        .rs2    (instr_rs2),
+        .rd     (instr_rd),         // which register to save into
+        .mess   (wb_data),          // what to save
+        .rs1_op (reg_read1),
+        .rs2_op (reg_read2)
     );
 
-        // ================= EXECUTE =================
+    // ================= EXECUTE =================
     // --- MUX A: picks the ALU's first input ---
     reg [31:0] alu_in_a;
 
@@ -110,13 +110,25 @@ module cpu_top (
     wire [31:0] alu_out;
     wire        alu_is_zero;
 
-    alu u_alu (
-        .a        (alu_in_a),
-        .b        (alu_in_b),
-        .alu_ctrl (ctrl_alu_ctrl),
-        .result   (alu_out),
-        .zero     (alu_is_zero)
+    ALU u_alu (
+        .a       (alu_in_a),
+        .b       (alu_in_b),
+        .opr_sel (ctrl_alu_ctrl),
+        .res     (alu_out),
+        .zero    (alu_is_zero)
     );
+
+    // ================= WRITE-BACK =================
+    // --- WB MUX: picks what gets saved into rd ---
+    always @(*) begin
+        case (ctrl_wb_sel)
+            2'b00:   wb_data = alu_out;        // ALU result
+            2'b01:   wb_data = 32'b0;          // TEMPORARY: memory data (Step 5)
+            2'b10:   wb_data = next_seq_pc;    // PC + 4 (JAL / JALR)
+            default: wb_data = 32'b0;
+        endcase
+    end
+
 endmodule
 
 `default_nettype wire
