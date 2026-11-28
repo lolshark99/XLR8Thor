@@ -28,7 +28,95 @@ module cpu_top (
         .addr  (current_pc),
         .instr (fetched_instr)
     );
+    // ================= DECODE =================
+    // --- slice the instruction into its fields ---
+    wire [6:0] instr_opcode = fetched_instr[6:0];
+    wire [4:0] instr_rd     = fetched_instr[11:7];
+    wire [2:0] instr_funct3 = fetched_instr[14:12];
+    wire [4:0] instr_rs1    = fetched_instr[19:15];
+    wire [4:0] instr_rs2    = fetched_instr[24:20];
+    wire       instr_bit30  = fetched_instr[30];
 
+    // --- control unit outputs ---
+    wire       ctrl_reg_write;
+    wire       ctrl_alu_src;
+    wire [1:0] ctrl_alu_a_sel;
+    wire [3:0] ctrl_alu_ctrl;
+    wire       ctrl_mem_read;
+    wire       ctrl_mem_write;
+    wire [1:0] ctrl_wb_sel;
+    wire       ctrl_branch;
+    wire       ctrl_jal;
+    wire       ctrl_jalr;
+    wire       ctrl_illegal;
+
+    Control_Unit u_cu (
+        .opcode    (instr_opcode),
+        .funct3    (instr_funct3),
+        .funct7    (instr_bit30),
+        .reg_write (ctrl_reg_write),
+        .alu_src   (ctrl_alu_src),
+        .alu_a_sel (ctrl_alu_a_sel),
+        .alu_ctrl  (ctrl_alu_ctrl),
+        .mem_read  (ctrl_mem_read),
+        .mem_write (ctrl_mem_write),
+        .wb_sel    (ctrl_wb_sel),
+        .branch    (ctrl_branch),
+        .jal       (ctrl_jal),
+        .jalr      (ctrl_jalr),
+        .illegal   (ctrl_illegal)
+    );
+
+    // --- immediate generator ---
+    wire [31:0] imm_value;
+
+    imm_gen u_imm (
+        .instr (fetched_instr),
+        .imm   (imm_value)
+    );
+
+    // --- register file ---
+    wire [31:0] reg_read1;
+    wire [31:0] reg_read2;
+
+    regfile u_rf (
+        .clk      (sys_clk),
+        .we       (1'b0),           // TEMPORARY: no writing yet
+        .rs1      (instr_rs1),
+        .rs2      (instr_rs2),
+        .rd       (instr_rd),
+        .wd       (32'b0),          // TEMPORARY
+        .rs1_data (reg_read1),
+        .rs2_data (reg_read2)
+    );
+
+        // ================= EXECUTE =================
+    // --- MUX A: picks the ALU's first input ---
+    reg [31:0] alu_in_a;
+
+    always @(*) begin
+        case (ctrl_alu_a_sel)
+            2'b00:   alu_in_a = reg_read1;     // rs1 (normal)
+            2'b01:   alu_in_a = current_pc;    // PC  (AUIPC)
+            2'b10:   alu_in_a = 32'b0;         // 0   (LUI)
+            default: alu_in_a = reg_read1;
+        endcase
+    end
+
+    // --- MUX B: picks the ALU's second input ---
+    wire [31:0] alu_in_b = ctrl_alu_src ? imm_value : reg_read2;
+
+    // --- ALU ---
+    wire [31:0] alu_out;
+    wire        alu_is_zero;
+
+    alu u_alu (
+        .a        (alu_in_a),
+        .b        (alu_in_b),
+        .alu_ctrl (ctrl_alu_ctrl),
+        .result   (alu_out),
+        .zero     (alu_is_zero)
+    );
 endmodule
 
 `default_nettype wire

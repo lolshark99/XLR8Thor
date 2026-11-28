@@ -4,7 +4,7 @@
 module Control_Unit (
     input  wire [6:0] opcode,     
     input  wire [2:0] funct3,     
-    input  wire funct7,     /
+    input  wire funct7,     
     output reg reg_write,  
     output reg alu_src,    // ALU B: 0 = rs2, 1 = imm
     output reg  [1:0] alu_a_sel,  

@@ -1,4 +1,4 @@
-`include "opcodes.vh"          // gives us names like `OP_IMM instead of 7'b0010011
+`include "imm_gen_opcodes.vh"       // gives us names like `OP_IMM instead of 7'b0010011
 
 module imm_gen (
     input  wire [31:0] instr,  // IN:  the full 32-bit instruction
