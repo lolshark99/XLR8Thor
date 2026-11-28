@@ -17,15 +17,27 @@ against the hardware cost.
 - [x] ALU, with a self-checking testbench
 - [x] Register file
 - [x] Immediate generator
-- [ ] Control unit
-- [ ] Branch unit
-- [ ] Instruction and data memory
+- [x] Program counter (next-PC logic for branches, JAL, JALR), with testbench
+- [x] Instruction memory (ROM loaded from a hex file), with testbench
+- [x] Control unit (all 11 RV32I opcodes, ALU control merged in)
+- [x] Branch comparator (signed and unsigned)
+- [x] Data memory: word access (lw/sw)
+- [ ] Data memory: byte and halfword access (lb/lh/lbu/lhu/sb/sh)
 - [ ] Top-level single-cycle CPU
+- [ ] Test programs for every instruction type
 - [ ] Run C programs (RISC-V GCC toolchain)
 - [ ] Verification against the Spike ISA simulator
 - [ ] Vivado synthesis (frequency and resource usage)
 - [ ] M extension (hardware multiply)
 - [ ] Custom SIMD MAC instruction + benchmark
+
+## Control unit
+Decodes all 11 RV32I opcodes into the datapath control signals.
+The ALU control is merged into the main control unit: it takes the opcode,
+funct3 and instr[30], and outputs the 4-bit ALU operation directly.
+For I-type instructions, instr[30] is forced to 0 (it is part of the
+immediate), except for shift-right, where it selects SRLI vs SRAI.
+
 
 ## ALU
 Supports all RV32I arithmetic, logic, shift, and compare operations.
@@ -59,11 +71,23 @@ corner cases, including:
 
 ## Repository Structure
 ```
-rtl/              Verilog design files
-  alu.v           ALU
-  alu_defs.vh     Shared ALU operation codes
-tb/               Testbenches
-  alu_tb.v        ALU self-checking testbench
+rtl/                     Verilog design files
+  alu.v                  ALU
+  alu_defs.vh            Shared ALU operation codes
+  regfile.v ?            Register file (32 x 32-bit, x0 hardwired to 0)
+  imm_gen.v ?            Immediate generator (I/S/B/U/J formats)
+  imm_gen_opcodes.vh     Shared RV32I opcode definitions
+  pc.v                   Program counter and next-PC logic
+  instruction_mem.v      Instruction memory (ROM)
+  CU.v                   Control unit
+  Branch_Comparator.v    Branch condition logic
+  dmem.v                 Data memory (RAM)
+tb/                      Testbenches
+  alu_tb.v
+  pc_tb.v
+  imem_tb.v
+programs/                Test programs (hex)
+  program.hex
 ```
 
 ## How to Run
